@@ -1,0 +1,9 @@
+v0.4.0
+
+Reemplazar:
+- index.html
+- assets/css/style.css
+
+Agregar:
+- pages/catalogo.html
+- assets/js/catalogo.js

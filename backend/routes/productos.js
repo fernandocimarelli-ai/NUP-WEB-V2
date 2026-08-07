@@ -1,0 +1,1 @@
+const r=require('express').Router();r.get('/',(_,res)=>res.json([{id:1,nombre:'NUP 60 cc'}]));module.exports=r;

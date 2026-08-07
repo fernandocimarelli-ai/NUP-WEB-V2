@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "nombre": "NUP 60 cc",
+    "categoria": "Loción",
+    "descripcion": "Producto natural",
+    "imagen": "assets/img/producto1.png"
+  },
+  {
+    "id": 2,
+    "nombre": "NUP Spray",
+    "categoria": "Spray",
+    "descripcion": "Aplicación rápida",
+    "imagen": "assets/img/producto2.png"
+  }
+]

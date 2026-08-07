@@ -1,0 +1,14 @@
+[
+  {
+    "id": "all",
+    "nombre": "Todos"
+  },
+  {
+    "id": "Loción",
+    "nombre": "Loción"
+  },
+  {
+    "id": "Spray",
+    "nombre": "Spray"
+  }
+]

@@ -1,0 +1,12 @@
+Actualización v0.2
+
+Reemplazar:
+- index.html
+- assets/css/style.css
+- assets/js/app.js
+
+Utiliza las imágenes existentes:
+- assets/img/LOGO.PNG
+- assets/img/fondo.jpg
+- assets/img/producto1.png
+- assets/img/producto2.png
