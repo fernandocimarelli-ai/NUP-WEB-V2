@@ -6,4 +6,4 @@ module.exports = [
         categoria: "higiene",
         imagen: "assets/img/producto1.png"
     }
-];
+]; 
