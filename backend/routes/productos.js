@@ -2,14 +2,13 @@ const router = require("express").Router();
 
 const productos = require("../data/productos");
 
-// Obtener todos los productos
+// GET - todos los productos
 router.get("/", (req, res) => {
     res.json(productos);
 });
 
-// Obtener un producto por ID
+// GET - producto por ID
 router.get("/:id", (req, res) => {
-
     const id = Number(req.params.id);
 
     const producto = productos.find(p => p.id === id);
@@ -21,7 +20,24 @@ router.get("/:id", (req, res) => {
     }
 
     res.json(producto);
+});
 
+// POST - crear producto
+router.post("/", (req, res) => {
+    const nuevo = {
+        id: productos.reduce(
+            (max, p) => Math.max(max, Number(p.id) || 0),
+            0
+        ) + 1,
+        nombre: req.body.nombre,
+        descripcion: req.body.descripcion,
+        categoria: req.body.categoria,
+        imagen: req.body.imagen
+    };
+
+    productos.push(nuevo);
+
+    res.status(201).json(nuevo);
 });
 
 module.exports = router;

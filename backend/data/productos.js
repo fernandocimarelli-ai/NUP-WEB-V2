@@ -1,4 +1,4 @@
-module.exports = [
+﻿module.exports = [
     {
         id: 1,
         nombre: "NUP 60 cc",
@@ -6,4 +6,4 @@ module.exports = [
         categoria: "higiene",
         imagen: "assets/img/producto1.png"
     }
-]; 
+];
