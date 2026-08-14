@@ -1,80 +1,205 @@
 const router = require("express").Router();
 
-const productos = require("../data/productos");
+const db = require("../db");
 
 // GET - todos los productos
 router.get("/", (req, res) => {
-    res.json(productos);
+    db.all(
+        "SELECT * FROM productos ORDER BY id",
+        [],
+        (err, productos) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    error: "Error al obtener productos"
+                });
+            }
+
+            res.json(productos);
+        }
+    );
 });
 
 // GET - producto por ID
 router.get("/:id", (req, res) => {
     const id = Number(req.params.id);
 
-    const producto = productos.find(p => p.id === id);
+    db.get(
+        "SELECT * FROM productos WHERE id = ?",
+        [id],
+        (err, producto) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    error: "Error al obtener el producto"
+                });
+            }
 
-    if (!producto) {
-        return res.status(404).json({
-            error: "Producto no encontrado"
-        });
-    }
+            if (!producto) {
+                return res.status(404).json({
+                    error: "Producto no encontrado"
+                });
+            }
 
-    res.json(producto);
+            res.json(producto);
+        }
+    );
 });
 
 // POST - crear producto
 router.post("/", (req, res) => {
-    const nuevo = {
-        id: productos.reduce(
-            (max, p) => Math.max(max, Number(p.id) || 0),
-            0
-        ) + 1,
-        nombre: req.body.nombre,
-        descripcion: req.body.descripcion,
-        categoria: req.body.categoria,
-        imagen: req.body.imagen
-    };
+    const {
+        nombre,
+        descripcion,
+        categoria,
+        imagen
+    } = req.body;
 
-    productos.push(nuevo);
+    if (!nombre) {
+        return res.status(400).json({
+            error: "El nombre es obligatorio"
+        });
+    }
 
-    res.status(201).json(nuevo);
+    const sql = `
+        INSERT INTO productos
+        (nombre, descripcion, categoria, imagen)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    db.run(
+        sql,
+        [nombre, descripcion, categoria, imagen],
+        function (err) {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    error: "Error al crear el producto"
+                });
+            }
+
+            res.status(201).json({
+                id: this.lastID,
+                nombre,
+                descripcion,
+                categoria,
+                imagen
+            });
+        }
+    );
 });
+
 // PUT - modificar producto
 router.put("/:id", (req, res) => {
     const id = Number(req.params.id);
 
-    const producto = productos.find(p => p.id === id);
+    const {
+        nombre,
+        descripcion,
+        categoria,
+        imagen
+    } = req.body;
 
-    if (!producto) {
-        return res.status(404).json({
-            error: "Producto no encontrado"
-        });
-    }
+    db.get(
+        "SELECT * FROM productos WHERE id = ?",
+        [id],
+        (err, producto) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    error: "Error al buscar el producto"
+                });
+            }
 
-    producto.nombre = req.body.nombre ?? producto.nombre;
-    producto.descripcion = req.body.descripcion ?? producto.descripcion;
-    producto.categoria = req.body.categoria ?? producto.categoria;
-    producto.imagen = req.body.imagen ?? producto.imagen;
+            if (!producto) {
+                return res.status(404).json({
+                    error: "Producto no encontrado"
+                });
+            }
 
-    res.json(producto);
+            const actualizado = {
+                nombre: nombre ?? producto.nombre,
+                descripcion: descripcion ?? producto.descripcion,
+                categoria: categoria ?? producto.categoria,
+                imagen: imagen ?? producto.imagen
+            };
+
+            const sql = `
+                UPDATE productos
+                SET nombre = ?,
+                    descripcion = ?,
+                    categoria = ?,
+                    imagen = ?
+                WHERE id = ?
+            `;
+
+            db.run(
+                sql,
+                [
+                    actualizado.nombre,
+                    actualizado.descripcion,
+                    actualizado.categoria,
+                    actualizado.imagen,
+                    id
+                ],
+                function (err) {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).json({
+                            error: "Error al actualizar el producto"
+                        });
+                    }
+
+                    res.json({
+                        id,
+                        ...actualizado
+                    });
+                }
+            );
+        }
+    );
 });
-module.exports = router;
+
 // DELETE - eliminar producto
 router.delete("/:id", (req, res) => {
     const id = Number(req.params.id);
 
-    const indice = productos.findIndex(p => p.id === id);
+    db.get(
+        "SELECT * FROM productos WHERE id = ?",
+        [id],
+        (err, producto) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({
+                    error: "Error al buscar el producto"
+                });
+            }
 
-    if (indice === -1) {
-        return res.status(404).json({
-            error: "Producto no encontrado"
-        });
-    }
+            if (!producto) {
+                return res.status(404).json({
+                    error: "Producto no encontrado"
+                });
+            }
 
-    const eliminado = productos.splice(indice, 1)[0];
+            db.run(
+                "DELETE FROM productos WHERE id = ?",
+                [id],
+                function (err) {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).json({
+                            error: "Error al eliminar el producto"
+                        });
+                    }
 
-    res.json({
-        mensaje: "Producto eliminado correctamente",
-        producto: eliminado
-    });
+                    res.json({
+                        mensaje: "Producto eliminado correctamente",
+                        producto
+                    });
+                }
+            );
+        }
+    );
 });
+
+module.exports = router;
